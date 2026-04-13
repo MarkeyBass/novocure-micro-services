@@ -9,3 +9,6 @@ ng generate interface housinglocation
 
 // Moved data layer (data fetching to the housing service)
 ng generate service housing.service --skip-testsit
+
+// Run json placeholder
+npx json-server --watch db.json
