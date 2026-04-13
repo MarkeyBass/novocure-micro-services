@@ -1,0 +1,11 @@
+// Like npm run devs
+ng serve
+
+ng generate component home
+
+ng generate component housingLocation
+
+ng generate interface housinglocation
+
+// Moved data layer (data fetching to the housing service)
+ng generate service housing.service --skip-testsit

@@ -1,0 +1,53 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio / MSBuild
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.rsuser
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet (legacy packages folder in repo root)
+[Pp]ackages/
+*.nupkg
+*.snupkg
+
+# Local / sensitive config overrides
+**/appsettings.*.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+node_modules
+dist
+
+# Angular CLI cache
+.angular/
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+
+# Local env files (keep .env.example committed if you use one)
+.env
+.env.*.local
+
+# JetBrains
+.idea/

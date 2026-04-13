@@ -1,0 +1,23 @@
+Tutorial: https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api?view=aspnetcore-9.0&tabs=visual-studio-code
+
+// running the app
+dotnet run --launch-profile https 
+
+https://localhost:<port>/openapi/v1.json
+
+dotnet aspnet-codegenerator controller -name TodoItemsController -async -api -m TodoItem -dc TodoContext -outDir Controllers
+
+
+
+dotnet tool uninstall -g dotnet-aspnet-codegenerator
+dotnet tool install -g dotnet-aspnet-codegenerator --version 9.0.0
+
+dotnet aspnet-codegenerator controller -name TodoItemsController -async -api -m TodoItem -dc TodoContext -outDir Controllers
+
+
+Use EF Core migrations so the schema is created from your model:
+From the project folder (where the .csproj is):
+===============================================
+dotnet tool install --global dotnet-ef
+dotnet ef migrations add InitialCreate
+dotnet ef database update
