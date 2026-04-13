@@ -14,9 +14,42 @@ MongoDB (Docker Compose in local-databases/docker-compose.yaml)
   container only. appsettings.json does NOT expand ${VAR} like Docker Compose — use a
   real URI in configuration, or override from the shell:
 
-    export BookStoreDatabase__ConnectionString='mongodb://admin:password123@localhost:27018/?authSource=admin'
+    export HousingDatabase__ConnectionString='mongodb://admin:password123@localhost:27018/?authSource=admin'
 
-  (Double underscore __ is how nested keys map to BookStoreDatabase:ConnectionString.)
+  (Double underscore __ is how nested keys map to HousingDatabase:ConnectionString.)
 
   Port 27018 is the host port published from the container; credentials must match
   the environment block under the mongodb service in docker-compose.yaml.
+
+CLI scaffolding notes
+
+  Yes, using the .NET CLI/code generator is common for repetitive ASP.NET Core scaffolding.
+
+  Create a new ASP.NET Core Web API project from scratch:
+
+    dotnet new webapi -n HousingApi
+
+  Restore local tools (if the repo uses a tool manifest):
+
+    dotnet tool restore
+
+  Install the ASP.NET Core code generator package in the project:
+
+    dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design
+
+  Generate an API controller with Entity Framework scaffolding:
+
+    dotnet aspnet-codegenerator controller -name TodoItemsController -async -api -m TodoItem -dc TodoContext -outDir Controllers
+
+  Similar example for a housing entity if using EF-backed scaffolding:
+
+    dotnet aspnet-codegenerator controller -name LocationsController -async -api -m HousingLocation -dc HousingContext -outDir Controllers
+
+  Note:
+
+    This generator is mainly for EF Core CRUD scaffolding. For MongoDB services like this project,
+    people often scaffold the controller shape manually and then write the service/repository code by hand.
+
+  Restore packages:
+
+    dotnet restore
