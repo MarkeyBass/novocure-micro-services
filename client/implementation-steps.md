@@ -60,7 +60,7 @@ Test checklist:
 - Verify invalid payload handling.
 
 Status:
-- Pending
+- Implemented, pending review and testing
 
 ## Step 3: Switch Angular housing reads to `HousingApi`
 

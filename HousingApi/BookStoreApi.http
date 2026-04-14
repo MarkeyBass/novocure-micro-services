@@ -9,3 +9,20 @@ GET {{HousingApi_HostAddress}}/api/locations/replace-with-object-id
 Accept: application/json
 
 ###
+
+GET {{HousingApi_HostAddress}}/api/applications
+Accept: application/json
+
+###
+
+POST {{HousingApi_HostAddress}}/api/applications
+Content-Type: application/json
+
+{
+  "housingId": "replace-with-location-object-id",
+  "firstName": "Mark",
+  "lastName": "Kirzhner",
+  "email": "mark@example.com"
+}
+
+###

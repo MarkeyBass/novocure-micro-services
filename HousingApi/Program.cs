@@ -10,8 +10,9 @@ builder.Services.Configure<HousingDatabaseSettings>(
     builder.Configuration.GetSection("HousingDatabase")
 );
 
-// mongo service - makes queries to the database
+// mongo services - make queries to the database
 builder.Services.AddSingleton<HousingLocationsService>();
+builder.Services.AddSingleton<HousingApplicationsService>();
 
 // Use the default ASP.NET Core camelCase JSON naming so the Angular client can
 // consume the API shape without extra mapping.

@@ -7,4 +7,6 @@ public class HousingDatabaseSettings
     public string DatabaseName { get; set; } = null!;
 
     public string LocationsCollectionName { get; set; } = null!;
+
+    public string ApplicationsCollectionName { get; set; } = null!;
 }
