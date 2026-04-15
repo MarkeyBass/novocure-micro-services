@@ -13,6 +13,11 @@ import { RouterLink, RouterOutlet } from "@angular/router";
           <img class="brand-logo" src="/public/logo.svg" alt="logo" aria-hidden="true" />
         </header>
       </a>
+      <!-- Navigation link to the Todos page. routerLink is Angular's router-aware alternative
+           to a plain <a href>. It updates the URL without a full page reload. -->
+      <nav>
+        <a [routerLink]="['/todos']">Todos</a>
+      </nav>
       <section class="content">
         <!-- <app-home /> -->
         <!-- router outlet is a placeholder for the child routes -->
