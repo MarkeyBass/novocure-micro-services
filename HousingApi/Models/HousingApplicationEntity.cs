@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace HousingApi.Models;
 
-public class HousingApplication
+public class HousingApplicationEntity
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]

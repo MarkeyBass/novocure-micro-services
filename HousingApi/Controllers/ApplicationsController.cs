@@ -22,7 +22,7 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<HousingApplicationDto>>> Get()
+    public async Task<ActionResult<List<HousingApplicationResponse>>> Get()
     {
         var applications = await _applicationsService.GetAsync();
 
@@ -31,7 +31,7 @@ public class ApplicationsController : ControllerBase
     }
 
     [HttpGet("{id:length(24)}")]
-    public async Task<ActionResult<HousingApplicationDto>> Get(string id)
+    public async Task<ActionResult<HousingApplicationResponse>> Get(string id)
     {
         var application = await _applicationsService.GetAsync(id);
 
@@ -40,12 +40,12 @@ public class ApplicationsController : ControllerBase
             return NotFound();
         }
 
-        return MapToDto(application);
+        return MapToDto(application!);
     }
 
     [HttpPost]
-    public async Task<ActionResult<HousingApplicationDto>> Post(
-        CreateHousingApplicationDto createApplicationDto
+    public async Task<ActionResult<HousingApplicationResponse>> Post(
+        CreateHousingApplicationRequest createApplicationDto
     )
     {
         if (!ObjectId.TryParse(createApplicationDto.HousingId, out _))
@@ -68,7 +68,7 @@ public class ApplicationsController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var application = new HousingApplication
+        var application = new HousingApplicationEntity
         {
             HousingId = createApplicationDto.HousingId,
             FirstName = createApplicationDto.FirstName,
@@ -82,7 +82,7 @@ public class ApplicationsController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id = application.Id }, MapToDto(application));
     }
 
-    private static HousingApplicationDto MapToDto(HousingApplication application) =>
+    private static HousingApplicationResponse MapToDto(HousingApplicationEntity application) =>
         new()
         {
             Id = application.Id ?? string.Empty,

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HousingApi.Models;
 
-public class CreateHousingApplicationDto
+public class CreateHousingApplicationRequest
 {
     [Required]
     public string HousingId { get; set; } = null!;

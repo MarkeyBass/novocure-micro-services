@@ -1,6 +1,6 @@
 namespace HousingApi.Models;
 
-public class HousingApplicationDto
+public class HousingApplicationResponse
 {
     public string Id { get; set; } = null!;
 

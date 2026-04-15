@@ -14,10 +14,10 @@ public class LocationsController : ControllerBase
         _locationsService = locationsService;
 
     [HttpGet]
-    public async Task<List<HousingLocation>> Get() => await _locationsService.GetAsync();
+    public async Task<List<HousingLocationEntity>> Get() => await _locationsService.GetAsync();
 
     [HttpGet("{id:length(24)}")]
-    public async Task<ActionResult<HousingLocation>> Get(string id)
+    public async Task<ActionResult<HousingLocationEntity>> Get(string id)
     {
         var location = await _locationsService.GetAsync(id);
 
@@ -30,7 +30,7 @@ public class LocationsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(HousingLocation newLocation)
+    public async Task<IActionResult> Post(HousingLocationEntity newLocation)
     {
         await _locationsService.CreateAsync(newLocation);
 
@@ -38,7 +38,7 @@ public class LocationsController : ControllerBase
     }
 
     [HttpPut("{id:length(24)}")]
-    public async Task<IActionResult> Update(string id, HousingLocation updatedLocation)
+    public async Task<IActionResult> Update(string id, HousingLocationEntity updatedLocation)
     {
         var location = await _locationsService.GetAsync(id);
 
@@ -47,7 +47,7 @@ public class LocationsController : ControllerBase
             return NotFound();
         }
 
-        updatedLocation.Id = location.Id;
+        updatedLocation.Id = location!.Id;
 
         await _locationsService.UpdateAsync(id, updatedLocation);
 
