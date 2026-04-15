@@ -6,7 +6,7 @@ Short form:
 
   dotnet run -lp https
 
-Run this from the project directory (the folder containing BookStoreApi.csproj).
+Run this from the project directory (the folder containing HousingApi.csproj).
 
 MongoDB (Docker Compose in local-databases/docker-compose.yaml)
 
