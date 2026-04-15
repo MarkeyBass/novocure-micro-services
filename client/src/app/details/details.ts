@@ -90,7 +90,7 @@ import { Observable } from "rxjs";
 export class Details {
   readonly housingService = inject(HousingService);
   readonly route = inject(ActivatedRoute);
-  housingLocationId: number = Number(this.route.snapshot.params["id"]);
+  housingLocationId: string = this.route.snapshot.params["id"];
 
   // The template subscribes to this Observable with the async pipe.
   // That removes the need for Promise.then(...) and markForCheck().
@@ -134,10 +134,22 @@ export class Details {
       this.applyForm.markAllAsTouched();
       return;
     }
-    this.housingService.submitApplication(
-      this.applyForm.value.firstName ?? "",
-      this.applyForm.value.lastName ?? "",
-      this.applyForm.value.email ?? "",
-    );
+    this.housingService
+      .submitApplication(
+        this.housingLocationId,
+        this.applyForm.value.firstName ?? "",
+        this.applyForm.value.lastName ?? "",
+        this.applyForm.value.email ?? "",
+      )
+      .subscribe((result) => {
+        // `subscribe(...)` is what "starts" the HTTP request.
+        // Angular's HttpClient returns an Observable (lazy stream), so without subscribing
+        // nothing is sent over the network. The callback runs once the server responds.
+        if (!result) {
+          return;
+        }
+
+        this.applyForm.reset();
+      });
   }
 }

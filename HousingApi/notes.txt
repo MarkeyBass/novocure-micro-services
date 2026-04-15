@@ -2,6 +2,9 @@ Run the API with HTTPS (uses the `https` profile from Properties/launchSettings.
 
   dotnet run --launch-profile https
 
+For hot reload:
+  dotnet watch --launch-profile https
+
 Short form:
 
   dotnet run -lp https

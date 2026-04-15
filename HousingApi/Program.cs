@@ -5,6 +5,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // ================================
+
+// 1. Register CORS policy (add this near the top, with your other services)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowAngularDev",
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:4200",
+                    "http://localhost:5173",
+                    "https://localhost:4200",
+                    "https://localhost:5173"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
+});
+
 // Add MongoDB configuration for the housing service.
 builder.Services.Configure<HousingDatabaseSettings>(
     builder.Configuration.GetSection("HousingDatabase")
@@ -36,6 +57,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// 2. Apply CORS policy
+app.UseCors("AllowAngularDev");
 
 app.UseAuthorization();
 

@@ -33,10 +33,12 @@ public class ApplicationsController : ControllerBase
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<HousingApplicationResponse>> Get(string id)
     {
+        Console.WriteLine("Get application by id: " + id);
         var application = await _applicationsService.GetAsync(id);
 
         if (application is null)
         {
+            Console.WriteLine("Get application by id: " + id);
             return NotFound();
         }
 

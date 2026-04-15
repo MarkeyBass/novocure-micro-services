@@ -1,14 +1,42 @@
-// Like npm run devs
-ng serve
 
-ng generate component home
+  Old commands to generate components and run json-server:
+  ng generate component home
+  ng generate component housingLocation
+  ng generate interface housinglocation
+  // Moved data layer (data fetching to the housing service)
+  ng generate service housing.service --skip-testsit
+  // Run json placeholder
+  npx json-server --watch db.json
 
-ng generate component housingLocation
 
-ng generate interface housinglocation
 
-// Moved data layer (data fetching to the housing service)
-ng generate service housing.service --skip-testsit
 
-// Run json placeholder
-npx json-server --watch db.json
+Run the UI:
+
+  ng serve
+
+Run the Housing API (from `HousingApi/`):
+
+  dotnet watch --launch-profile https
+
+Things to consider:
+==========================
+HTTPS dev cert: calling https://localhost:7152 from Angular will fail silently in the browser if the cert isn’t trusted. Run 
+  `dotnet dev-certs https --trust` 
+  and restart the API.
+
+
+CORS origin: you allowed http://localhost:4200. If your Angular dev server is https://localhost:4200 or a different port (Vite sometimes uses 5173), you must add that origin too.
+
+API base URL: hardcoding https://localhost:7152 is fine for now, but ideally put it in an Angular environment or use a proxy later.
+
+Notes:
+- JSON server is no longer needed for the housing flow (we now call `HousingApi`).
+- `db.json` can still be kept as a seed/reference dataset.
+
+Scaffolding (optional):
+
+  ng generate component home
+  ng generate component housingLocation
+  ng generate interface housinglocation
+  ng generate service housing.service --skip-tests

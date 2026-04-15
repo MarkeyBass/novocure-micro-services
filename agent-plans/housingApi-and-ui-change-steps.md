@@ -83,7 +83,7 @@ Test checklist:
 - Verify empty/error handling still works.
 
 Status:
-- Pending
+- Implemented, pending final end-to-end verification
 
 ## Step 4: Wire Angular submit form to the applications endpoint
 
@@ -104,7 +104,7 @@ Test checklist:
 - Verify `GET all` shows the new submission.
 
 Status:
-- Pending
+- Implemented, pending final end-to-end verification
 
 ## Step 5: Cleanup and verify local workflow
 
@@ -118,14 +118,14 @@ Expected result:
 
 Review before moving on:
 - Confirm which local commands remain.
-- Confirm whether `db.json` should stay for reference only or be retired.
+- Confirm whether `db.json` should stay for reference only or be retired. - keep it (non distructive)
 
 Test checklist:
 - Start API and client together.
 - Verify list, details, and submit flow end-to-end.
 
 Status:
-- Pending
+- Implemented, pending final end-to-end verification
 
 ## Future Step: RabbitMQ integration
 
