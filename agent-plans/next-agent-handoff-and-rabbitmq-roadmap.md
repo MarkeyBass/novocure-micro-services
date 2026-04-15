@@ -2,8 +2,8 @@
 
 This document is a handoff plan for the next agent. It captures **current repo state**, **what is already done**, and a **concrete next execution path**:
 
-- **Finish Step 3 + Step 4** from the existing checklist (Angular → HousingApi).
-- Then begin the **RabbitMQ event-driven microservices** work (HousingApi/BookStoreApi producers, TodoApi consumer + reverse “todo completed” events).
+- **Angular → HousingApi integration (Steps 3–5) is already implemented**.
+- Next focus: the **RabbitMQ event-driven microservices** work (HousingApi/BookStoreApi producers, TodoApi consumer + reverse “todo completed” events).
 
 ---
 
@@ -37,6 +37,7 @@ This document is a handoff plan for the next agent. It captures **current repo s
 - Notes:
   - JSON uses default ASP.NET camelCase (so Angular can consume without mapping).
   - IDs are Mongo `ObjectId` strings (24 chars).
+  - CORS: `HousingApi/Program.cs` allows Angular dev origins for both `4200` and `5173` (http+https).
 
 ### HousingApi: Applications collection + endpoints (Mongo)
 
@@ -52,15 +53,21 @@ This document is a handoff plan for the next agent. It captures **current repo s
   - `housingId` validated as ObjectId and checked for existence in Locations.
   - `createdAt` set server-side (`DateTime.UtcNow`).
 
-### Naming convention (partially applied)
+### Naming convention (applied in HousingApi)
 
-The repo moved toward explicit naming:
+HousingApi uses explicit naming:
 
 - Entities: `*Entity`
 - Requests: `*Request`
 - Responses: `*Response`
 
 Important: ensure class names and file names stay aligned (C# best practice).
+
+Current types of interest:
+- Locations entity: `HousingApi.Models.HousingLocationEntity`
+- Applications entity: `HousingApi.Models.HousingApplicationEntity`
+- Applications request: `HousingApi.Models.CreateHousingApplicationRequest`
+- Applications response: `HousingApi.Models.HousingApplicationResponse`
 
 ### Solution naming cleanup
 
@@ -89,59 +96,33 @@ If errors mention missing types like `HousingApplicationDto`, it usually means t
 
 ---
 
-## Next work: Step 3 (Angular reads from HousingApi)
+## Angular UI integration status (completed)
 
-### Goal
-Replace JSON server reads (`http://localhost:3000/locations`) with HousingApi reads.
+### What was done
+- Replaced JSON-server reads with real API calls.
+- Switched Angular route id and model id to `string` (Mongo ObjectId).
+- Added submit flow to POST applications to the API.
 
-### Tasks
+### Current URLs
+- Angular calls:
+  - `https://localhost:7152/api/locations`
+  - `https://localhost:7152/api/applications`
 
-1. Update Angular model to ObjectId string
-   - `client/src/app/housinglocation.ts`: change `id: number` → `id: string` (or `Id` mapping strategy if chosen).
-
-2. Update routes and ID parsing
-   - `client/src/app/routes.ts`: unchanged route pattern `details/:id` is fine.
-   - `client/src/app/details/details.ts`: `housingLocationId` should be `string` and should not call `Number(...)`.
-
-3. Update `HousingService` URLs + methods
-   - `client/src/app/housing.service.ts`
-     - base URL should become something like:
-       - `http://localhost:5125/api/locations` (http profile) OR
-       - `https://localhost:7152/api/locations` (https profile)
-     - keep returning `Observable<...>` and maintain existing error behavior (`[]` / `undefined`).
-
-4. CORS
-   - If Angular runs on a different port, configure CORS in `HousingApi/Program.cs` (dev-only) OR use an Angular proxy config.
-
-### Verification checklist
+### Verification checklist (still worth re-running locally)
 - UI loads list from API (no JSON server running).
 - UI details page loads by ObjectId string.
-
----
-
-## Next work: Step 4 (Angular submit → HousingApi applications)
-
-### Goal
-Wire the “Apply now” form to POST to `HousingApi` applications endpoint.
-
-### Tasks
-
-1. Extend `HousingService.submitApplication(...)`
-   - Add `housingId` and POST payload:
-     - `{ housingId, firstName, lastName, email }`
-
-2. Update details component submit call
-   - pass the current route `id` as `housingId`.
-
-3. UX (minimal)
-   - On success: clear/reset form and/or show a simple confirmation.
-   - On failure: basic error message.
-
-### Verification checklist
-- Submitting form creates a document in Mongo `Applications` collection.
+- Submitting the form creates a document in Mongo `Applications` collection.
 - `GET /api/applications` shows it.
 
 ---
+
+### Local run commands
+- UI: `ng serve` (from `client/`)
+- API: `dotnet watch --launch-profile https` (from `HousingApi/`)
+
+Notes:
+- `client/commands.txt` was updated to reflect this (JSON server no longer needed).
+- If HTTPS requests fail silently in the browser, run `dotnet dev-certs https --trust`.
 
 ## RabbitMQ roadmap (event-driven microservices)
 
