@@ -34,6 +34,22 @@ export class HousingService {
       .pipe(catchError(() => of(undefined)));
   }
 
+  // Returns all submitted housing applications as a single-emit Observable.
+  // Adding this here (instead of a new service) because it belongs to the same
+  // HousingApi domain — same base URL, same auth context, same responsibility boundary.
+  getAllApplications(): Observable<HousingApplicationInfo[]> {
+    return this.http
+      .get<HousingApplicationInfo[]>(this.urlApplications)
+      .pipe(
+        tap((res) => console.log("Applications loaded:", res)),
+        catchError((err) => {
+          console.error("Failed to load applications:", err);
+          // Emit an empty array so the template renders the empty-state instead of crashing.
+          return of([]);
+        }),
+      );
+  }
+
   submitApplication(
     housingId: string,
     firstName: string,
