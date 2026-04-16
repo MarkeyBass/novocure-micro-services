@@ -19,3 +19,13 @@ Migration process:
 
 If dotnet ef is missing
 `dotnet tool install --global dotnet-ef`
+
+## TodoApi microservices connection string 
+```bash
+ConnectionStrings__TodoContext="Server=sqlserver,1433;Database=TodoApi;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+```
+
+## TodoApi local connection string 
+```bash
+ConnectionStrings__TodoContext="Server=localhost,1433;Database=TodoApi;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+```

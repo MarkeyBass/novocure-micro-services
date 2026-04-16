@@ -45,6 +45,21 @@ services:
       - sqlserver_data:/var/opt/mssql
     networks:
       - app-network
+    # Health check for SQL Server.
+    # Compose marks this service as "healthy" only after SQL accepts a simple query
+    # (or, as a fallback, after port 1433 is reachable). Because `todo-api` uses
+    # `depends_on: condition: service_healthy`, Docker will not start the TodoApi
+    # container until this check passes.
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "if [ -x /opt/mssql-tools18/bin/sqlcmd ]; then /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\"; else bash -c '</dev/tcp/localhost/1433'; fi",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
     # Apple Silicon: uncomment if the image fails to start (emulates x86_64)
     platform: linux/amd64
 
@@ -57,6 +72,32 @@ services:
       - "8978:8978"
     depends_on:
       - sqlserver
+    networks:
+      - app-network
+
+  # TodoApi — containerised ASP.NET Core service
+  # ConnectionStrings__TodoContext overrides appsettings.json at runtime.
+  # "Server=sqlserver,1433" uses the compose service name as the hostname.
+  # This local container path is HTTP-only; HTTPS should be terminated later by a
+  # reverse proxy such as nginx rather than inside the app container.
+  todo-api:
+    build:
+      context: ../TodoApi
+      dockerfile: Dockerfile
+    container_name: todo-api
+    restart: unless-stopped
+    ports:
+      - "5188:8080"    # http://localhost:5188
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__TodoContext: "Server=sqlserver,1433;Database=TodoApi;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+    depends_on:
+      # `todo-api` waits for SQL Server to become healthy before the container starts.
+      # After the container starts, the app still runs EF migrations during its own
+      # startup path in `Program.cs`; requests are not served until that startup finishes.
+      sqlserver:
+        condition: service_healthy
     networks:
       - app-network
 

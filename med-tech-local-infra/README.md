@@ -48,6 +48,35 @@ GO
 
 ---
 
+## TodoApi
+
+**Browser** → http://localhost:5188/swagger (Swagger UI, Development only)
+
+**Terminal** (smoke test)
+```bash
+curl http://localhost:5188/api/TodoItems
+```
+
+> **Note:** EF Core migrations run automatically on startup via `Database.Migrate()` — the `TodoApi` database and schema are created on first boot.
+
+### Development workflow
+
+**Don't use Docker for TodoApi during active development.** Run it on the host instead:
+
+```bash
+cd TodoApi
+dotnet watch run --launch-profile https
+```
+
+The API connects to the containerised SQL Server via `localhost:1433` (the port is exposed to the host). You get instant hot reload and easy debugger attachment.
+
+Use the containerised `todo-api` service only when testing the full stack together (e.g. RabbitMQ wiring, integration tests).
+
+> **Why not volume-mount + `dotnet watch` inside Docker?**
+> Docker Desktop on macOS polls for file changes rather than using native OS events — hot reload is slow and unreliable. The SDK image is also ~900 MB vs ~220 MB for the runtime image. The host is the better dev environment for .NET.
+
+---
+
 ## RabbitMQ
 
 **Browser** → http://localhost:15672 (admin / admin)
@@ -67,6 +96,7 @@ docker exec -it rabbitmq rabbitmqctl list_queues name messages
 | mongo-express | Browser UI       | 8081  |
 | SQL Server    | TCP              | 1433  |
 | CloudBeaver   | Browser UI       | 8978  |
+| TodoApi       | HTTP             | 5188  |
 | RabbitMQ      | AMQP             | 5672  |
 | RabbitMQ      | Management UI    | 15672 |
 

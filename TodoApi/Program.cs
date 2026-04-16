@@ -34,7 +34,13 @@ builder.Services.AddOpenApi();
 // Added db context
 // builder.Services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDbContext<TodoContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("TodoContext"))
+    opt.UseSqlServer(
+        builder.Configuration.GetConnectionString("TodoContext"),
+        // In containers, SQL Server can be reachable but not fully ready yet.
+        // This retries transient connection/startup failures and pairs well with
+        // `Database.Migrate()` below, but it is not a replacement for migrations.
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
+    )
 );
 
 var app = builder.Build();
@@ -50,7 +56,18 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+var isRunningInContainer = string.Equals(
+    Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+    "true",
+    StringComparison.OrdinalIgnoreCase
+);
+
+// Keep HTTPS redirection for host development, but skip it for the local
+// containerized path where TodoApi is intentionally exposed over HTTP only.
+if (!isRunningInContainer)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
@@ -58,5 +75,16 @@ app.UseAuthorization();
 app.UseCors("AllowAngularDev");
 
 app.MapControllers();
+
+// Apply any pending EF Core migrations on startup.
+// This creates the database and schema automatically when running in a container,
+// so there's no need to run "dotnet ef database update" manually.
+// Startup blocks here until migrations complete or fail, so the API will not
+// serve requests before the schema is ready.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
