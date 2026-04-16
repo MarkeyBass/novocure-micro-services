@@ -1,7 +1,7 @@
 services:
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongo
     restart: unless-stopped
     ports:
       - "27018:27017"
@@ -11,7 +11,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     networks:
-      - mongo-network
+      - app-network
 
   mongo-express:
     image: mongo-express:latest
@@ -22,18 +22,18 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: password123
-      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongo:27017/
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin123
     depends_on:
-      - mongodb
+      - mongo
     networks:
-      - mongo-network
+      - app-network
 
-  # Microsoft SQL Server (replaces MySQL in this stack)
-  mssql:
+  # Microsoft SQL Server
+  sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: mssql
+    container_name: sqlserver
     restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
@@ -56,16 +56,33 @@ services:
     ports:
       - "8978:8978"
     depends_on:
-      - mssql
+      - sqlserver
+    networks:
+      - app-network
+
+  # RabbitMQ message broker + management UI
+  # AMQP port 5672: .NET services connect here to publish/consume messages
+  # Management UI port 15672: http://localhost:15672 (login: admin / admin)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - app-network
 
 volumes:
   mongodb_data:
   mssql_data:
+  rabbitmq_data:
 
 networks:
-  mongo-network:
-    driver: bridge
   app-network:
     driver: bridge
