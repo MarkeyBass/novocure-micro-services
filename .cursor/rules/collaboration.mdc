@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+keep responses short by default
+no repeated explanations
+give one next step at a time
+prefer exact commands over long prose
+ask before making broad refactors
+when debugging Docker, check for orphan containers and port conflicts first

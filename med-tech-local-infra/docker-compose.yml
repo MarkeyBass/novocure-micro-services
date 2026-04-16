@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password123
     volumes:
-      - mongodb_data:/data/db
+      - mongo_data:/data/db
     networks:
       - app-network
 
@@ -42,11 +42,11 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - mssql_data:/var/opt/mssql
+      - sqlserver_data:/var/opt/mssql
     networks:
       - app-network
     # Apple Silicon: uncomment if the image fails to start (emulates x86_64)
-    # platform: linux/amd64
+    platform: linux/amd64
 
   # Web UI for SQL Server (create DBs, run queries). First run: open UI → create admin → New connection.
   cloudbeaver:
@@ -64,7 +64,7 @@ services:
   # AMQP port 5672: .NET services connect here to publish/consume messages
   # Management UI port 15672: http://localhost:15672 (login: admin / admin)
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management
     container_name: rabbitmq
     restart: unless-stopped
     ports:
@@ -79,8 +79,8 @@ services:
       - app-network
 
 volumes:
-  mongodb_data:
-  mssql_data:
+  mongo_data:
+  sqlserver_data:
   rabbitmq_data:
 
 networks:

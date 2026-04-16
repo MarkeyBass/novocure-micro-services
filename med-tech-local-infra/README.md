@@ -1,7 +1,7 @@
 # Local Infrastructure
 
 ```
-cd dbs-docker-compose
+cd med-tech-local-infra
 docker compose up -d
 docker compose down        # stop
 docker compose down -v     # stop + wipe all data
@@ -69,3 +69,25 @@ docker exec -it rabbitmq rabbitmqctl list_queues name messages
 | CloudBeaver   | Browser UI       | 8978  |
 | RabbitMQ      | AMQP             | 5672  |
 | RabbitMQ      | Management UI    | 15672 |
+
+## Named volumes
+
+- `mongo_data`
+- `sqlserver_data`
+- `rabbitmq_data`
+
+
+
+## Test docker-compose
+```bash
+cd med-tech-local-infra
+docker compose up -d
+docker compose ps
+```
+
+## Then verify in the browser:
+```bash
+http://localhost:8081
+http://localhost:8978
+http://localhost:15672
+```
