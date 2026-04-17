@@ -48,6 +48,44 @@ GO
 
 ---
 
+## Seed data
+
+Seed the locations into Mongo via HousingApi (run after `docker compose up -d`):
+
+```bash
+for row in $(cat seed-locations.json | python3 -c "import sys,json; [print(json.dumps(r)) for r in json.load(sys.stdin)]"); do
+  curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:7152/api/locations \
+    -H "Content-Type: application/json" -d "$row"
+done
+```
+
+IDs are assigned by MongoDB — `id` is not included in `seed-locations.json`.
+
+---
+
+## HousingApi
+
+**Browser** → http://localhost:7152/swagger (Swagger UI, Development only)
+
+**Terminal** (smoke test)
+```bash
+curl http://localhost:7152/api/locations
+curl http://localhost:7152/api/applications
+```
+
+### Development workflow
+
+Run on the host for active development — same reasoning as TodoApi:
+
+```bash
+cd HousingApi
+dotnet watch run --launch-profile https
+```
+
+The API connects to the containerised Mongo via `localhost:27018`. Use the containerised `housing-api` service for full-stack or integration testing.
+
+---
+
 ## TodoApi
 
 **Browser** → http://localhost:5188/swagger (Swagger UI, Development only)
@@ -96,6 +134,7 @@ docker exec -it rabbitmq rabbitmqctl list_queues name messages
 | mongo-express | Browser UI       | 8081  |
 | SQL Server    | TCP              | 1433  |
 | CloudBeaver   | Browser UI       | 8978  |
+| HousingApi    | HTTP             | 7152  |
 | TodoApi       | HTTP             | 5188  |
 | RabbitMQ      | AMQP             | 5672  |
 | RabbitMQ      | Management UI    | 15672 |

@@ -101,6 +101,27 @@ services:
     networks:
       - app-network
 
+  # HousingApi — containerised ASP.NET Core service (Mongo-backed)
+  # HousingDatabase__ConnectionString overrides the nested appsettings.json key at runtime.
+  # "mongo:27017" uses the compose service name as the hostname.
+  # HTTP-only locally; HTTPS is a reverse proxy concern.
+  housing-api:
+    build:
+      context: ../HousingApi
+      dockerfile: Dockerfile
+    container_name: housing-api
+    restart: unless-stopped
+    ports:
+      - "7152:8080"    # http://localhost:7152
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      HousingDatabase__ConnectionString: "mongodb://admin:password123@mongo:27017/?authSource=admin"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
   # RabbitMQ message broker + management UI
   # AMQP port 5672: .NET services connect here to publish/consume messages
   # Management UI port 15672: http://localhost:15672 (login: admin / admin)

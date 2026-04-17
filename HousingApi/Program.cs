@@ -56,7 +56,17 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// Skip HTTPS redirect when running in a container — HTTP-only locally, TLS is a reverse proxy concern.
+var isRunningInContainer = string.Equals(
+    Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
+    "true",
+    StringComparison.OrdinalIgnoreCase
+);
+
+if (!isRunningInContainer)
+{
+    app.UseHttpsRedirection();
+}
 
 // 2. Apply CORS policy
 app.UseCors("AllowAngularDev");
