@@ -124,6 +124,19 @@ Use the containerised `todo-api` service only when testing the full stack togeth
 docker exec -it rabbitmq rabbitmqctl list_queues name messages
 ```
 
+**Check exchange stats** (after posting an application)
+```bash
+curl -s -u admin:admin http://localhost:15672/api/exchanges/%2F/housing.application.created
+```
+
+### Events in use
+
+| Exchange                        | Type   | Producer   | Event                       |
+|---------------------------------|--------|------------|-----------------------------|
+| `housing.application.created`   | fanout | HousingApi | `HousingApplicationCreated` |
+
+Message fields: `applicationId`, `housingId`, `firstName`, `lastName`, `email`, `createdAt`.
+
 ---
 
 ## Ports at a glance

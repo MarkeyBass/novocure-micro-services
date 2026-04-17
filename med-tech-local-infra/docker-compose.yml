@@ -117,8 +117,10 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       HousingDatabase__ConnectionString: "mongodb://admin:password123@mongo:27017/?authSource=admin"
+      RabbitMQ__HostName: rabbitmq
     depends_on:
       - mongo
+      - rabbitmq
     networks:
       - app-network
 

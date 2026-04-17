@@ -35,6 +35,11 @@ builder.Services.Configure<HousingDatabaseSettings>(
 builder.Services.AddSingleton<HousingLocationsService>();
 builder.Services.AddSingleton<HousingApplicationsService>();
 
+// RabbitMQ — bind settings and register the publisher as a singleton.
+// The connection is opened on first use (first POST /api/applications).
+builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddSingleton<RabbitMqPublisher>();
+
 // Use the default ASP.NET Core camelCase JSON naming so the Angular client can
 // consume the API shape without extra mapping.
 // Hence, we removed this line: .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);

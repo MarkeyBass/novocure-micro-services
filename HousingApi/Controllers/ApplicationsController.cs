@@ -1,3 +1,4 @@
+using HousingApi.Messages;
 using HousingApi.Models;
 using HousingApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +12,17 @@ public class ApplicationsController : ControllerBase
 {
     private readonly HousingApplicationsService _applicationsService;
     private readonly HousingLocationsService _locationsService;
+    private readonly RabbitMqPublisher _publisher;
 
     public ApplicationsController(
         HousingApplicationsService applicationsService,
-        HousingLocationsService locationsService
+        HousingLocationsService locationsService,
+        RabbitMqPublisher publisher
     )
     {
         _applicationsService = applicationsService;
         _locationsService = locationsService;
+        _publisher = publisher;
     }
 
     [HttpGet]
@@ -79,7 +83,20 @@ public class ApplicationsController : ControllerBase
             CreatedAt = DateTime.UtcNow,
         };
 
+        // Persist to Mongo first. If this throws, the event is never published.
         await _applicationsService.CreateAsync(application);
+
+        // Publish only after a successful insert — application.Id is now set by Mongo.
+        _publisher.Publish(
+            new HousingApplicationCreated(
+                ApplicationId: application.Id!,
+                HousingId: application.HousingId,
+                FirstName: application.FirstName,
+                LastName: application.LastName,
+                Email: application.Email,
+                CreatedAt: application.CreatedAt
+            )
+        );
 
         return CreatedAtAction(nameof(Get), new { id = application.Id }, MapToDto(application));
     }
