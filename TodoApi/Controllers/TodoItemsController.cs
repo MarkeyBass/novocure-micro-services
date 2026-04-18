@@ -56,8 +56,12 @@ public class TodoItemsController : ControllerBase
             return NotFound();
         }
 
+        var now = DateTime.UtcNow;
         todoItem.Name = todoDTO.Name;
         todoItem.IsComplete = todoDTO.IsComplete;
+        todoItem.HousingApplicationId = NormalizeHousingApplicationId(todoDTO.HousingApplicationId);
+        todoItem.UpdatedAt = now;
+        todoItem.CompletedAt = todoDTO.IsComplete ? todoItem.CompletedAt ?? now : null;
 
         try
         {
@@ -79,7 +83,16 @@ public class TodoItemsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TodoItemDTO>> PostTodoItem(TodoItemDTO todoDTO)
     {
-        var todoItem = new TodoItem { IsComplete = todoDTO.IsComplete, Name = todoDTO.Name };
+        var now = DateTime.UtcNow;
+        var todoItem = new TodoItem
+        {
+            IsComplete = todoDTO.IsComplete,
+            Name = todoDTO.Name,
+            HousingApplicationId = NormalizeHousingApplicationId(todoDTO.HousingApplicationId),
+            CreatedAt = now,
+            UpdatedAt = now,
+            CompletedAt = todoDTO.IsComplete ? now : null,
+        };
 
         _context.TodoItems.Add(todoItem);
         await _context.SaveChangesAsync();
@@ -110,11 +123,18 @@ public class TodoItemsController : ControllerBase
         return _context.TodoItems.Any(e => e.Id == id);
     }
 
+    private static string? NormalizeHousingApplicationId(string? housingApplicationId) =>
+        string.IsNullOrWhiteSpace(housingApplicationId) ? null : housingApplicationId;
+
     private static TodoItemDTO ItemToDTO(TodoItem todoItem) =>
         new TodoItemDTO
         {
             Id = todoItem.Id,
             Name = todoItem.Name,
             IsComplete = todoItem.IsComplete,
+            HousingApplicationId = todoItem.HousingApplicationId ?? string.Empty,
+            CreatedAt = todoItem.CreatedAt,
+            UpdatedAt = todoItem.UpdatedAt,
+            CompletedAt = todoItem.CompletedAt,
         };
 }

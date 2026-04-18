@@ -108,13 +108,15 @@ public class HousingApplicationCreatedConsumer : BackgroundService
                 // for each message to get a fresh DbContext instead of sharing one across messages.
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<TodoContext>();
+                var now = DateTime.UtcNow;
 
                 var todo = new TodoItem
                 {
                     Name = $"Review housing application for {message.FirstName} {message.LastName}",
-                    // TODO: Add HousingApplicationId and add optional property to TodoItem
-                    // HousingApplicationId = message.ApplicationId,
+                    HousingApplicationId = message.ApplicationId,
                     IsComplete = false,
+                    CreatedAt = now,
+                    UpdatedAt = now,
                 };
 
                 db.TodoItems.Add(todo);
