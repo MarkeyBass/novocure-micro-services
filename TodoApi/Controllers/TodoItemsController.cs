@@ -72,13 +72,17 @@ public class TodoItemsController : ControllerBase
         var wasComplete = todoItem.IsComplete;
 
         var now = DateTime.UtcNow;
-        todoItem.Name = todoDTO.Name ?? todoItem.Name;
+        // Preserve the existing Name when the client omits it or sends an empty string.
+        if (!string.IsNullOrWhiteSpace(todoDTO.Name))
+        {
+            todoItem.Name = todoDTO.Name;
+        }
         todoItem.IsComplete = todoDTO.IsComplete;
 
-        // Preserve the existing HousingApplicationId when the client omits it from the
-        // update payload. This keeps the todo linked to its housing application when a
-        // caller only toggles completion status from Swagger or curl.
-        if (todoDTO.HousingApplicationId is not null)
+        // Preserve the existing HousingApplicationId when the client omits it or sends
+        // an empty string from Swagger. This keeps the todo linked to its housing
+        // application when a caller only toggles completion status.
+        if (!string.IsNullOrWhiteSpace(todoDTO.HousingApplicationId))
         {
             todoItem.HousingApplicationId = NormalizeHousingApplicationId(
                 todoDTO.HousingApplicationId
