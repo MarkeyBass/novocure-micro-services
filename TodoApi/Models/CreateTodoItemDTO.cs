@@ -1,0 +1,8 @@
+namespace TodoApi.Models;
+
+public class CreateTodoItemDTO
+{
+    public string? Name { get; set; }
+    public bool IsComplete { get; set; }
+    public string? HousingApplicationId { get; set; }
+}
