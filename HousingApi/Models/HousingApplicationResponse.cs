@@ -13,4 +13,8 @@ public class HousingApplicationResponse
     public string Email { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    public int CompletedReviewCount { get; set; }
+
+    public DateTime? LastReviewedAt { get; set; }
 }

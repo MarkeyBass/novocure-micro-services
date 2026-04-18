@@ -1,3 +1,4 @@
+using HousingApi.Consumers;
 using HousingApi.Models;
 using HousingApi.Services;
 
@@ -35,10 +36,10 @@ builder.Services.Configure<HousingDatabaseSettings>(
 builder.Services.AddSingleton<HousingLocationsService>();
 builder.Services.AddSingleton<HousingApplicationsService>();
 
-// RabbitMQ — bind settings and register the publisher as a singleton.
-// The connection is opened on first use (first POST /api/applications).
+// RabbitMQ — bind settings, register publisher singleton, and register background consumer.
 builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddSingleton<RabbitMqPublisher>();
+builder.Services.AddHostedService<TodoCompletedConsumer>();
 
 // Use the default ASP.NET Core camelCase JSON naming so the Angular client can
 // consume the API shape without extra mapping.

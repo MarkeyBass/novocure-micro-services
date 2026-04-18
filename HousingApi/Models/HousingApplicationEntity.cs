@@ -19,4 +19,11 @@ public class HousingApplicationEntity
     public string Email { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    // Incremented each time a linked TodoCompleted event is received.
+    // Existing documents without this field deserialize to 0 (C# int default) — no migration needed.
+    public int CompletedReviewCount { get; set; }
+
+    // Set to the CompletedAt timestamp of the most recent review. Null until first review.
+    public DateTime? LastReviewedAt { get; set; }
 }

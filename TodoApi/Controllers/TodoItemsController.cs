@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TodoApi.Messages;
 using TodoApi.Models;
+using TodoApi.Services;
 
 namespace TodoApi.Controllers;
 
@@ -9,10 +11,18 @@ namespace TodoApi.Controllers;
 public class TodoItemsController : ControllerBase
 {
     private readonly TodoContext _context;
+    private readonly RabbitMqPublisher _publisher;
+    private readonly ILogger<TodoItemsController> _logger;
 
-    public TodoItemsController(TodoContext context)
+    public TodoItemsController(
+        TodoContext context,
+        RabbitMqPublisher publisher,
+        ILogger<TodoItemsController> logger
+    )
     {
         _context = context;
+        _publisher = publisher;
+        _logger = logger;
     }
 
     // GET: api/TodoItems
@@ -45,7 +55,9 @@ public class TodoItemsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutTodoItem(long id, TodoItemDTO todoDTO)
     {
-        if (id != todoDTO.Id)
+        // Allow clients (especially Swagger/manual tests) to identify the resource by the
+        // route id only. If the body includes a non-default id, it must still match.
+        if (todoDTO.Id != default && id != todoDTO.Id)
         {
             return BadRequest();
         }
@@ -56,10 +68,23 @@ public class TodoItemsController : ControllerBase
             return NotFound();
         }
 
+        // Capture the pre-update state so we can detect the false → true transition.
+        var wasComplete = todoItem.IsComplete;
+
         var now = DateTime.UtcNow;
-        todoItem.Name = todoDTO.Name;
+        todoItem.Name = todoDTO.Name ?? todoItem.Name;
         todoItem.IsComplete = todoDTO.IsComplete;
-        todoItem.HousingApplicationId = NormalizeHousingApplicationId(todoDTO.HousingApplicationId);
+
+        // Preserve the existing HousingApplicationId when the client omits it from the
+        // update payload. This keeps the todo linked to its housing application when a
+        // caller only toggles completion status from Swagger or curl.
+        if (todoDTO.HousingApplicationId is not null)
+        {
+            todoItem.HousingApplicationId = NormalizeHousingApplicationId(
+                todoDTO.HousingApplicationId
+            );
+        }
+
         todoItem.UpdatedAt = now;
         todoItem.CompletedAt = todoDTO.IsComplete ? todoItem.CompletedAt ?? now : null;
 
@@ -70,6 +95,40 @@ public class TodoItemsController : ControllerBase
         catch (DbUpdateConcurrencyException) when (!TodoItemExists(id))
         {
             return NotFound();
+        }
+
+        // Only publish when the todo transitions from incomplete to complete.
+        // No event for: create, false→false, true→true, true→false.
+        if (!wasComplete && todoItem.IsComplete)
+        {
+            var housingAppId = todoItem.HousingApplicationId;
+            if (!string.IsNullOrWhiteSpace(housingAppId))
+            {
+                _publisher.Publish(
+                    new TodoCompleted(
+                        TodoId: todoItem.Id,
+                        HousingApplicationId: housingAppId,
+                        CompletedAt: todoItem.CompletedAt ?? now,
+                        Name: todoItem.Name
+                    )
+                );
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Todo {TodoId} completed but has no HousingApplicationId — skipping publish",
+                    todoItem.Id
+                );
+            }
+        }
+        else
+        {
+            _logger.LogInformation(
+                "Todo {TodoId} updated (wasComplete={WasComplete}, isComplete={IsComplete}) — no completion transition, skipping publish",
+                todoItem.Id,
+                wasComplete,
+                todoItem.IsComplete
+            );
         }
 
         return NoContent();

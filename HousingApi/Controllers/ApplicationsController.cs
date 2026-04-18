@@ -110,5 +110,7 @@ public class ApplicationsController : ControllerBase
             LastName = application.LastName,
             Email = application.Email,
             CreatedAt = application.CreatedAt,
+            CompletedReviewCount = application.CompletedReviewCount,
+            LastReviewedAt = application.LastReviewedAt,
         };
 }

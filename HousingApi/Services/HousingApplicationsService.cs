@@ -26,4 +26,15 @@ public class HousingApplicationsService
 
     public async Task CreateAsync(HousingApplicationEntity newApplication) =>
         await _applicationsCollection.InsertOneAsync(newApplication);
+
+    // Atomically increments CompletedReviewCount and sets LastReviewedAt using MongoDB update operators.
+    // Using $inc + $set rather than FindAsync/ReplaceOneAsync avoids a read-modify-write race condition.
+    public async Task IncrementCompletedReviewAsync(string id, DateTime reviewedAt)
+    {
+        var update = Builders<HousingApplicationEntity>
+            .Update.Inc(x => x.CompletedReviewCount, 1)
+            .Set(x => x.LastReviewedAt, reviewedAt);
+
+        await _applicationsCollection.UpdateOneAsync(x => x.Id == id, update);
+    }
 }
