@@ -92,12 +92,15 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__TodoContext: "Server=sqlserver,1433;Database=TodoApi;User Id=sa;Password=YourStrongPassword123!;TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
     depends_on:
-      # `todo-api` waits for SQL Server to become healthy before the container starts.
-      # After the container starts, the app still runs EF migrations during its own
-      # startup path in `Program.cs`; requests are not served until that startup finishes.
+      # Wait for SQL Server to be healthy before starting — migrations run on startup.
       sqlserver:
         condition: service_healthy
+      # RabbitMQ has no healthcheck; service_started is sufficient because the consumer
+      # connects lazily inside BackgroundService.ExecuteAsync after startup completes.
+      rabbitmq:
+        condition: service_started
     networks:
       - app-network
 

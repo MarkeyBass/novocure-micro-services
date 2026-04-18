@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using TodoApi.Consumers;
 using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,11 @@ builder.Services.AddCors(options =>
         }
     );
 });
+
+// RabbitMQ — bind settings and register the background consumer.
+// The consumer starts automatically when the app starts (IHostedService contract).
+builder.Services.Configure<RabbitMqSettings>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddHostedService<HousingApplicationCreatedConsumer>();
 
 builder.Services.AddControllers();
 
