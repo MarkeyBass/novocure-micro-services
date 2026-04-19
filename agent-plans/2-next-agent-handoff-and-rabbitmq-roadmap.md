@@ -153,11 +153,13 @@ If errors mention missing types like `HousingApplicationDto`, it usually means t
 - Nav links: Home, Todos, Applications.
 
 ### Current Angular→API URL map
-| Angular call                                  | Backend           |
-|-----------------------------------------------|-------------------|
-| `https://localhost:7152/api/locations`        | HousingApi        |
-| `https://localhost:7152/api/applications`     | HousingApi        |
-| `https://localhost:7236/api/TodoItems`        | TodoApi           |
+> **Updated in 5.1** — Angular services now use relative paths; the Angular dev-server proxy resolves the backend. See `agent-plans/5.1-angular-dev-proxy-setup.md`.
+
+| Angular call             | Backend     | Proxy target (local)        | Proxy target (compose)      |
+|--------------------------|-------------|-----------------------------|-----------------------------|
+| `/api/locations`         | HousingApi  | `http://localhost:5125`     | `http://localhost:7152`     |
+| `/api/applications`      | HousingApi  | `http://localhost:5125`     | `http://localhost:7152`     |
+| `/api/TodoItems`         | TodoApi     | `http://localhost:5188`     | `http://localhost:5188`     |
 
 ### Verification checklist (still worth re-running locally)
 - UI loads list from API (no JSON server running).
@@ -170,12 +172,14 @@ If errors mention missing types like `HousingApplicationDto`, it usually means t
 ---
 
 ### Local run commands
-- UI: `ng serve` (from `client/`)
-- API: `dotnet watch --launch-profile https` (from `HousingApi/`)
+> **Updated in 5.1/5.2** — use the proxy-aware npm scripts; prefer the `http` launch profile to avoid SSL/proxy issues.
 
-Notes:
-- `client/commands.txt` was updated to reflect this (JSON server no longer needed).
-- If HTTPS requests fail silently in the browser, run `dotnet dev-certs https --trust`.
+- UI (local APIs): `npm run start:local` (from `client/`)
+- UI (compose APIs): `npm run start:compose` (from `client/`)
+- HousingApi: `dotnet watch --launch-profile http` (from `HousingApi/`)
+- TodoApi: `dotnet watch --launch-profile http` (from `TodoApi/`)
+
+See `agent-plans/5.2-dev-startup-modes.md` for the full breakdown of local vs compose startup modes.
 
 ## RabbitMQ roadmap (event-driven microservices)
 
