@@ -13,10 +13,10 @@ export class HousingService {
   // instead of calling the browser fetch API directly.
   private readonly http = inject(HttpClient);
 
-  // This JSON server endpoint is the source of truth for the tutorial data.
-  // url = "http://localhost:3000/locations";
-  urlLocations = "https://localhost:7152/api/locations"; // HousingApi
-  urlApplications = "https://localhost:7152/api/applications"; // HousingApi
+  // Use relative URLs so Angular can swap backend targets via the dev proxy.
+  // That keeps service code the same for local dotnet-watch and docker-compose.
+  urlLocations = "/api/locations";
+  urlApplications = "/api/applications";
 
   getAllHousingLocations(): Observable<HousingLocationInfo[]> {
 

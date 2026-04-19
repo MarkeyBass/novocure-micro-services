@@ -9,8 +9,9 @@ import { TodoItem } from "./todo";
   providedIn: "root",
 })
 export class TodoService {
-  // TodoApi HTTPS base URL (see TodoApi/Properties/launchSettings.json)
-  private readonly todoApiUrl = "https://localhost:7236/api/TodoItems";
+  // Use a relative URL so the Angular dev proxy can route to either
+  // the host-run API or the docker-compose API without code changes.
+  private readonly todoApiUrl = "/api/TodoItems";
 
   // inject() is the modern Angular alternative to constructor injection.
   // HttpClient is already registered in app.config.ts via provideHttpClient().

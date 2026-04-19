@@ -97,10 +97,8 @@ services:
       # Wait for SQL Server to be healthy before starting — migrations run on startup.
       sqlserver:
         condition: service_healthy
-      # RabbitMQ has no healthcheck; service_started is sufficient because the consumer
-      # connects lazily inside BackgroundService.ExecuteAsync after startup completes.
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     networks:
       - app-network
 
@@ -122,8 +120,10 @@ services:
       HousingDatabase__ConnectionString: "mongodb://admin:password123@mongo:27017/?authSource=admin"
       RabbitMQ__HostName: rabbitmq
     depends_on:
-      - mongo
-      - rabbitmq
+      mongo:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -144,6 +144,12 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
 volumes:
   mongo_data:

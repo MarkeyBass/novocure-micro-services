@@ -1,0 +1,17 @@
+{
+  "/api/TodoItems": {
+    "target": "http://localhost:5188",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/locations": {
+    "target": "http://localhost:7152",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/applications": {
+    "target": "http://localhost:7152",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

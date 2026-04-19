@@ -50,7 +50,9 @@ public class HousingApplicationCreatedConsumer : BackgroundService
             Password = _settings.Password,
         };
 
-        using var connection = factory.CreateConnection();
+        using var connection = ConnectWithRetry(factory, stoppingToken);
+        if (connection is null)
+            return;
         using var channel = connection.CreateModel();
 
         // Declare the fanout exchange — idempotent, matches producer declaration.
@@ -152,5 +154,41 @@ public class HousingApplicationCreatedConsumer : BackgroundService
         stoppingToken.WaitHandle.WaitOne();
 
         _logger.LogInformation("HousingApplicationCreatedConsumer stopping");
+    }
+
+    private IConnection? ConnectWithRetry(
+        ConnectionFactory factory,
+        CancellationToken stoppingToken
+    )
+    {
+        const int maxAttempts = 10;
+        const int delaySeconds = 5;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            if (stoppingToken.IsCancellationRequested)
+                return null;
+            try
+            {
+                return factory.CreateConnection();
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                _logger.LogWarning(
+                    "RabbitMQ connection attempt {Attempt}/{Max} failed: {Message}. Retrying in {Delay}s...",
+                    attempt,
+                    maxAttempts,
+                    ex.Message,
+                    delaySeconds
+                );
+                stoppingToken.WaitHandle.WaitOne(TimeSpan.FromSeconds(delaySeconds));
+            }
+        }
+
+        _logger.LogError(
+            "Could not connect to RabbitMQ after {Max} attempts — consumer will not start",
+            maxAttempts
+        );
+        return null;
     }
 }
